@@ -1,0 +1,63 @@
+pip install flask flask-sqlalchemy flask-wtf flask-bootstrap
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+import os
+
+# Configuração da aplicação Flask
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'sua_chave_secreta'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pessoas.db'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
+
+# Inicialização do banco de dados
+db = SQLAlchemy(app)
+
+# Modelo de dados
+class Pessoa(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False, unique=True)
+    foto = db.Column(db.String(200), nullable=True)
+    documento = db.Column(db.String(200), nullable=True)
+
+# Rotas
+@app.route('/')
+def index():
+    pessoas = Pessoa.query.all()
+    return render_template('index.html', pessoas=pessoas)
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        foto = request.files['foto']
+        documento = request.files['documento']
+
+        # Verifica e salva arquivos
+        foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
+        documento_path = os.path.join(app.config['UPLOAD_FOLDER'], documento.filename)
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        foto.save(foto_path)
+        documento.save(documento_path)
+
+        # Adiciona registro ao banco de dados
+        nova_pessoa = Pessoa(nome=nome, email=email, foto=foto.filename, documento=documento.filename)
+        db.session.add(nova_pessoa)
+        db.session.commit()
+        flash('Pessoa cadastrada com sucesso!')
+        return redirect(url_for('index'))
+
+    return render_template('cadastro.html')
+
+@app.route('/pessoa/<int:id>')
+def detalhes(id):
+    pessoa = Pessoa.query.get_or_404(id)
+    return render_template('detalhes.html', pessoa=pessoa)
+
+# Iniciar aplicação
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
