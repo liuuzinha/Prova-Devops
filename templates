@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Pessoas</title>
+</head>
+<body>
+    <h1>Pessoas Cadastradas</h1>
+    <a href="/cadastro">Cadastrar Nova Pessoa</a>
+    <ul>
+        {% for pessoa in pessoas %}
+        <li>
+            {{ pessoa.nome }} - <a href="/pessoa/{{ pessoa.id }}">Ver detalhes</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+cadastro.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Pessoa</title>
+</head>
+<body>
+    <h1>Cadastro de Pessoa</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <label for="foto">Foto:</label>
+        <input type="file" id="foto" name="foto" required>
+        <br>
+        <label for="documento">Documento:</label>
+        <input type="file" id="documento" name="documento" required>
+        <br>
+        <button type="submit">Cadastrar</button>
+    </form>
+</body>
+</html>
+detalhes.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes de {{ pessoa.nome }}</title>
+</head>
+<body>
+    <h1>Detalhes de {{ pessoa.nome }}</h1>
+    <p>Email: {{ pessoa.email }}</p>
+    <p>Foto: <img src="/uploads/{{ pessoa.foto }}" alt="Foto de {{ pessoa.nome }}" width="150"></p>
+    <p>Documento: <a href="/uploads/{{ pessoa.documento }}">Baixar documento</a></p>
+    <a href="/">Voltar</a>
+</body>
+</html>
